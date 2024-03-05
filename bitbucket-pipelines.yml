@@ -1,0 +1,36 @@
+# bitbucket-pipelines.yml
+
+pipelines:
+  default:
+    - step: &build-docker-monitor-de-sites
+        name: Build and Push Docker Image
+        image: docker:19.03.12
+        services:
+          - docker
+        script:
+          - VERSION=$(cat version.txt)
+          - docker build -t registry.unidavi.edu.br/br.edu.unidavi/monitor-de-sites:$VERSION --build-arg SPRING_PROFILES_ACTIVE=dev-docker .
+          - docker login registry.unidavi.edu.br -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          - docker push registry.unidavi.edu.br/br.edu.unidavi/monitor-de-sites:$VERSION
+
+pipelines:
+  branches:
+    '{master}':
+      - step: *build-docker-monitor-de-sites
+        condition:
+          changesets:
+            includePaths:
+              - "monitor-de-sites/*"
+    '{main}':
+      - step: *build-docker-monitor-de-sites
+        condition:
+          changesets:
+            includePaths:
+              - "monitor-de-sites/*"
+    '{develop}':
+      - step: *build-docker-monitor-de-sites
+        condition:
+          changesets:
+            includePaths:
+              - "monitor-de-sites/*"
+              
